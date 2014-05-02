@@ -7,7 +7,7 @@
 
 </head>
 <body>
-	<div id="container">
+	<div id="main-region">
 		<p>This is our Static Page.</p>
 	</div>
 
@@ -17,10 +17,25 @@
 	<script src='js/vendor/underscore.js' type='text/javascript' charset='utf-8'></script>
 	<script src='js/vendor/backbone.js' type='text/javascript' charset='utf-8'></script>
 	<script src='js/vendor/backbone.marionette.js' type='text/javascript' charset='utf-8'></script>
+	<script src='js/main.js' type='text/javascript' charset='utf-8' async defer></script>
 
-<script type='text/javascript' charset='utf-8'>
 
+<!--start my templates -->
+<script id='todoLayout' type='text/template' charset='utf-8'>
+	<div id='todo-add'></div>
+	<ul id='todo-list'></ul>
 </script>
 
+<script id='input-todo' type='text/template' charset='utf-8'>
+	<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
+</script>
+
+<script id='todoList' type='text/template' charset='utf-8'>
+	<span id='elementLI'>I am your fathaaa</span>
+</script>
+<!--end my templates -->
+
+
+</script>
 </body>
 </html>

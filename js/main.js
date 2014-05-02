@@ -1,177 +1,73 @@
-(function($) {
+var TodoApp = new Marionette.Application();
 
-    _.templateSettings = {
-      interpolate : /\{\{(.+?)\}\}/g
-    };
+	TodoApp.addRegions({
+		mainRegion : '#main-region'
+	});
 
+	TodoApp.TodoLayout = Marionette.Layout.extend({
+		template : '#todoLayout',
+		regions:{
+			addTodo : '#todo-add',
+			listTodo : '#todo-list'
+		}
+	});
 
-    Backbone.Model.prototype.idAttribute = '_id';
+	TodoApp.StaticView = Marionette.ItemView.extend({
+		template : '#input-todo',
+		tagName : 'span',
+		'ui' : {
+			'elementLI' : '#elementLI',
+			'todoInput' : '#todoInput'
+		},
 
-    var tweetsView, tweetDetailsView;
+		'events' : {
+			'keypress @ui.todoInput' : 'keyCode',
+			'clicked @ui.elementLI' : 'taskClicked',
+			'blur @ui.elementLI' : 'editThis2',
+		},
 
-    var Tweet = Backbone.Model.extend({
-      urlRoot: '/tweets',
-      defaults: function() {
-        return {
-          author: '',
-          status: ''
-        }
-      }
-    });
-    var TweetsList = Backbone.Collection.extend({
-      model: Tweet,
-      url: '/tweets'
-    });
-    var tweets = new TweetsList();
+		taskClicked : function (){
+			console.log('clicked');
+			this.ui.elementLI.attr('contenteditable', true);
+		},
 
-    var TweetView = Backbone.View.extend({
-      model: new Tweet(),
-      tagName: 'div',
-      events: {
-        'click .edit': 'edit',
-        'click .delete': 'delete',
-        'blur .elementLI': 'close',
-        'keypress .elementLI': 'onEnterUpdate'
-      },
-      initialize: function() {
-        this.template = _.template($('#taskTemplate').html());
-      },
-      edit: function(ev) {
-        ev.preventDefault();
-        this.$('.status').attr('contenteditable', true).focus();
-      },
-      details: function(ev) {
-        var target = $(ev.currentTarget);
-        ev.preventDefault();
-        router.navigate(target.attr('href'), {trigger: true});
-      },
-      close: function(ev) {
-        var status = this.$('.elementLI').text();
-        var self = this;
-        this.model.save({status: status}, {
-            success: function() { console.log("successfully updated tweet " + self.model.id )},
-            error: function() { console.log("Failed to update tweet with id=" + self.model.id );}
-        });
-        this.$('.elementLI').removeAttr('contenteditable');
-      },
-      onEnterUpdate: function(ev) {
-        var self = this;
-        if (ev.keyCode === 13) {
-          this.close();
-          _.delay(function() { self.$('.elementLI').blur() }, 100);
-        }
-      },
-      delete: function(ev) {
-        var self = this;
-        ev.preventDefault();
-        this.model.destroy({
-            success: function() { tweets.remove(this.model); },
-            error: function() { console.log("Failed to remove tweet with id=" + self.model.id ); }
-        });
-      },
-      render: function() {
-        this.$el.html(this.template(this.model.toJSON()));
-        return this;
-      }
-    });
+		editThis2 : function(){
+			this.ui.elementLI.attr.removeAttr('contenteditable');
+		},
 
-    var TweetsView = Backbone.View.extend({
-      model: tweets,
-      el: $('#tweets-container'),
-      initialize: function() {
-        var self = this;
-        this.model.on('add', this.render, this);
-        this.model.on('remove', this.render, this);
+		keyCode : function(e){
+			if(e.keyCode === 13 ){
+				this.addTodo();
+			}else{
 
-        tweets.fetch({
-          success: function() { self.render(); },
-          error: function() { console.log('Cannot retrive models from server'); }
-        });
-      },
-      render: function() {
-        var self = this;
-        self.$el.html('');
-        _.each(this.model.toArray(), function(tweet, i) {
-          self.$el.append((new TweetView({model: tweet})).render().$el);
-        });
-        return this;
-      },
-      hide: function() {
-        this.$el.hide();
-      },
-      show: function() {
-        this.$el.show();
-      },
-    });
+			}
+		},
 
-   var TweetDetailsView = Backbone.View.extend({
-      el: $('#tweet-details'),
-      events: {
-        'click .back': 'back'
-      },
-      initialize: function() {
-        this.template = _.template($('#tweet-details-template').html());
-      },
-      back: function(ev) {
-        ev.preventDefault();
-        router.navigate('', {trigger: true});
-      },
-      hide: function() {
-        this.$el.hide();
-      },
-      show: function(model) {
-        this.model = model;
-        this.render();
-        this.$el.show();
-      },
-      render: function() {
-        this.$el.html(this.template(this.model.toJSON()));
-        return this;
-      }
-    });
+		addTodo : function(){
+			var todoInput = $('#todoInput').val();
+			$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
+			console.log(todoInput);
+		}
 
-    var Router = Backbone.Router.extend({
-        routes: {
-            '': 'index',
-            'tweets/:id': 'show'
-        },
-        index: function() {
-            tweetDetailsView.hide();
-            tweetsView.show();
-        },
-        show: function(id) {
-            model = new Tweet({_id: id});
-            model.fetch({
-                success: function() {
-                    tweetDetailsView.show(model);
-                    tweetsView.hide();
-                },
-                error: function()  {
-                    console.log("Cannot fetch model to show!");
-                }
-            });
-        }
-    });
+	});
 
-    var router = new Router();
+	TodoApp.TodoList = Marionette.ItemView.extend({
+		template : '#todoList',
+		tagName : 'li'
+	});
 
-    $(document).ready(function() {
-      $('#new-tweet').submit(function(ev) {
-        var tweet = new Tweet({ author: $('#author-name').val(), status: $('#status-update').val() });
-        tweets.add(tweet);
-        console.log(tweets.toJSON());
-        tweet.save({}, {
-          success: function() { console.log("successfully saved tweet!"); },
-          error: function() { console.log("Error saving tweet!"); }
-        });
+	TodoApp.on('initialize:after', function(){
+		console.log('App is initialized');
 
-        return false;
-      });
+		var addTodoItem = new TodoApp.StaticView();
+		var todoList = new TodoApp.TodoList();
+		var layout = new TodoApp.TodoLayout();
+		console.log(layout);
 
-      tweetsView = new TweetsView();
-      tweetDetailsView = new TweetDetailsView();
-      Backbone.history.start({pushState: true});
-    });
+		TodoApp.mainRegion.show(layout);
+		layout.addTodo.show(addTodoItem);
+		layout.listTodo.show(todoList);
 
+	});
 
-})(jQuery);
+	TodoApp.start();

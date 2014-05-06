@@ -1,11 +1,17 @@
 var express = require('express'),
 	app = express(),
+	connect = require('connect'),
 	http = require('http'),
 	server = http.createServer(app),
 	port = 3030,
 	path = require('path'),
 	cwd = process.cwd(),
+	crud = require('./controllers/todoAPI'),
+	configDB = require('./controllers/database.js'),
+	mongoose = require('mongoose'),
 	files = path.join(cwd);
+
+	mongoose.connect(configDB.url);
 
 	var allowCrossDomain = function(req, res, next){
 		res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,6 +27,12 @@ var express = require('express'),
 
 	app.use( allowCrossDomain);
 	app.use(express.static(files));
+	app.use(connect.bodyParser());
+
+	app.get('/todos', crud.displayTodo);
+	app.post('/', crud.create);
+	app.delete('/todos/:id', crud.destroy);
+	app.put('/todos/:id', crud.update);
 
 	server.listen(port, function(){
 		console.log('App is starting in port 3030');

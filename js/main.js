@@ -4,6 +4,16 @@ var TodoApp = new Marionette.Application();
 		mainRegion : '#main-region'
 	});
 
+	TodoApp.todoModel = Backbone.Model.extend({
+		idAttribute : '_id',
+		url : 'http://localhost:3030/todos'
+	});
+
+	TodoApp.todoCollection = Backbone.Collection.extend({
+		model : TodoApp.todoModel,
+		url : 'http://localhost:3030/todos'
+	});
+
 	TodoApp.TodoLayout = Marionette.Layout.extend({
 		template : '#todoLayout',
 		regions:{
@@ -42,10 +52,11 @@ var TodoApp = new Marionette.Application();
 
 			}
 		},
-
 		addTodo : function(){
 			var todoInput = $('#todoInput').val();
+
 			$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
+			$('#todoInput').val('');
 			console.log(todoInput);
 		}
 
@@ -56,18 +67,27 @@ var TodoApp = new Marionette.Application();
 		tagName : 'li'
 	});
 
+	TodoApp.todoCollectionView = Marionette.CollectionView.extend({
+		itemView: TodoApp.TodoList
+	});
+
 	TodoApp.on('initialize:after', function(){
 		console.log('App is initialized');
 
+		var todoCollection = new TodoApp.todoCollection();
 		var addTodoItem = new TodoApp.StaticView();
-		var todoList = new TodoApp.TodoList();
+
+		var collectionView = new TodoApp.todoCollectionView({
+			collection : todoCollection
+		});
+
 		var layout = new TodoApp.TodoLayout();
 		console.log(layout);
 
+		todoCollection.fetch();
 		TodoApp.mainRegion.show(layout);
 		layout.addTodo.show(addTodoItem);
-		layout.listTodo.show(todoList);
-
+		layout.listTodo.show(collectionView);
 	});
 
 	TodoApp.start();

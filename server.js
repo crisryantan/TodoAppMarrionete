@@ -30,7 +30,7 @@ var express = require('express'),
 	app.use(connect.bodyParser());
 
 	app.get('/todos', crud.displayTodo);
-	app.post('/', crud.create);
+	app.post('/todos', crud.create);
 	app.delete('/todos/:id', crud.destroy);
 	app.put('/todos/:id', crud.update);
 

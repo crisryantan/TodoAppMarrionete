@@ -6,7 +6,12 @@ var TodoApp = new Marionette.Application();
 
 	TodoApp.todoModel = Backbone.Model.extend({
 		idAttribute : '_id',
-		url : 'http://localhost:3030/todos'
+		urlRoot : 'http://localhost:3030/todos',
+		validate : function(attrs){
+			if(!attrs.todo.trim()){
+				return 'Enter valid todo';
+			}
+		}
 	});
 
 	TodoApp.todoCollection = Backbone.Collection.extend({
@@ -54,17 +59,49 @@ var TodoApp = new Marionette.Application();
 		},
 		addTodo : function(){
 			var todoInput = $('#todoInput').val();
+			var task = new TodoApp.todoModel({ todo : todoInput});
+			var self = this;
 
-			$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
-			$('#todoInput').val('');
-			console.log(todoInput);
+			task.save({},{
+				success : function(data){ console.log('successfully added todo');
+					self.collection.add(data);
+					//$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
+					$('#todoInput').val('');
+			},
+				error   : function(err){ console.log('error saving todo : ' + err);}
+			});
+
+
+		//	console.log(todoInput);
 		}
 
 	});
 
 	TodoApp.TodoList = Marionette.ItemView.extend({
 		template : '#todoList',
-		tagName : 'li'
+		tagName : 'li',
+		//url: '/todos',
+
+		events : {
+			'click .delete' : 'deleteThis'
+		},
+
+		deleteThis : function () {
+			console.log(this.model.get('_id'));
+			console.log(this.model);
+			console.log(this.collection)
+
+			//this.model.set('id', this.model.get('id'));
+			this.model.destroy(null,{
+				success : function(){
+				//	this.collection.remove(this.model);
+					},
+				error: function(err){ console.log('error');},
+				wait : true
+			});
+		}
+
+		//event for delete
 	});
 
 	TodoApp.todoCollectionView = Marionette.CollectionView.extend({
@@ -75,7 +112,7 @@ var TodoApp = new Marionette.Application();
 		console.log('App is initialized');
 
 		var todoCollection = new TodoApp.todoCollection();
-		var addTodoItem = new TodoApp.StaticView();
+		var addTodoItem = new TodoApp.StaticView({ collection : todoCollection });
 
 		var collectionView = new TodoApp.todoCollectionView({
 			collection : todoCollection

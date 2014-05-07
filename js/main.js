@@ -4,6 +4,7 @@ var TodoApp = new Marionette.Application();
 		mainRegion : '#main-region'
 	});
 
+
 	TodoApp.todoModel = Backbone.Model.extend({
 		idAttribute : '_id',
 		urlRoot : 'http://localhost:3030/todos',
@@ -19,6 +20,7 @@ var TodoApp = new Marionette.Application();
 		url : 'http://localhost:3030/todos'
 	});
 
+
 	TodoApp.TodoLayout = Marionette.Layout.extend({
 		template : '#todoLayout',
 		regions:{
@@ -31,7 +33,7 @@ var TodoApp = new Marionette.Application();
 		template : '#input-todo',
 		tagName : 'span',
 		'ui' : {
-			'elementLI' : '#elementLI',
+			'elementLI' : '.elementLI',
 			'todoInput' : '#todoInput'
 		},
 
@@ -65,7 +67,7 @@ var TodoApp = new Marionette.Application();
 			task.save({},{
 				success : function(data){ console.log('successfully added todo');
 					self.collection.add(data);
-					//$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
+				//	$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
 					$('#todoInput').val('');
 			},
 				error   : function(err){ console.log('error saving todo : ' + err);}
@@ -80,28 +82,44 @@ var TodoApp = new Marionette.Application();
 	TodoApp.TodoList = Marionette.ItemView.extend({
 		template : '#todoList',
 		tagName : 'li',
-		//url: '/todos',
 
 		events : {
-			'click .delete' : 'deleteThis'
+			'click .delete' : 'deleteThis',
+			'click .elementLI' : 'taskClicked',
+			'blur .elementLI' : 'editThis2',
+			'keypress .elementLI': 'onEnterUpdate'
+		},
+
+		taskClicked : function(){
+			this.$('.elementLI').attr('contenteditable', true);
+		},
+
+		editThis : function(){
+			var self = this;
+			var todo = this.$('.elementLI').text();
+
+        this.model.save({todo: todo}, {
+            success: function() { console.log("successfully updated todo");},
+            error: function() { console.log("Failed to update todo");}
+        });
+
+			this.$('.elementLI').removeAttr('contenteditable');
+		},
+
+		onEnterUpdate: function(ev) {
+			if (ev.keyCode === 13) {
+				this.editThis();
+			}
 		},
 
 		deleteThis : function () {
 			console.log(this.model.get('_id'));
 			console.log(this.model);
-			console.log(this.collection)
-
-			//this.model.set('id', this.model.get('id'));
 			this.model.destroy(null,{
-				success : function(){
-				//	this.collection.remove(this.model);
-					},
-				error: function(err){ console.log('error');},
-				wait : true
+				success : function(){console.log('success');},
+				error: function(err){ console.log('error');}
 			});
 		}
-
-		//event for delete
 	});
 
 	TodoApp.todoCollectionView = Marionette.CollectionView.extend({

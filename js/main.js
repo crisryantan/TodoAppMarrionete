@@ -33,23 +33,11 @@ var TodoApp = new Marionette.Application();
 		template : '#input-todo',
 		tagName : 'span',
 		'ui' : {
-			'elementLI' : '.elementLI',
 			'todoInput' : '#todoInput'
 		},
 
 		'events' : {
 			'keypress @ui.todoInput' : 'keyCode',
-			'clicked @ui.elementLI' : 'taskClicked',
-			'blur @ui.elementLI' : 'editThis2',
-		},
-
-		taskClicked : function (){
-			console.log('clicked');
-			this.ui.elementLI.attr('contenteditable', true);
-		},
-
-		editThis2 : function(){
-			this.ui.elementLI.attr.removeAttr('contenteditable');
 		},
 
 		keyCode : function(e){
@@ -67,14 +55,10 @@ var TodoApp = new Marionette.Application();
 			task.save({},{
 				success : function(data){ console.log('successfully added todo');
 					self.collection.add(data);
-				//	$('#todo-list').append('<li><span id="elementLI">' + todoInput +'</span></li>');
 					$('#todoInput').val('');
 			},
 				error   : function(err){ console.log('error saving todo : ' + err);}
 			});
-
-
-		//	console.log(todoInput);
 		}
 
 	});
@@ -83,11 +67,26 @@ var TodoApp = new Marionette.Application();
 		template : '#todoList',
 		tagName : 'li',
 
+		ui : {
+			'todoDelete' : '.delete',
+			'finished' : '.elementCheckbox',
+			'todos' : '.elementLI'
+		},
+
 		events : {
-			'click .delete' : 'deleteThis',
-			'click .elementLI' : 'taskClicked',
-			'blur .elementLI' : 'editThis2',
-			'keypress .elementLI': 'onEnterUpdate'
+			'click @ui.todoDelete' : 'deleteThis',
+			'click @ui.todos' : 'taskClicked',
+			'blur @ui.todos' : 'editThis',
+			'keypress @ui.todos': 'onEnterUpdate',
+			'click @ui.finished' : 'updateCheckbox'
+		},
+
+		initialize: function(){
+			if(this.model.get('isFinished')){
+				this.$el.addClass( 'isDone' )
+			}else{
+				this.$el.addClass( '' )
+			}
 		},
 
 		taskClicked : function(){
@@ -97,10 +96,10 @@ var TodoApp = new Marionette.Application();
 		editThis : function(){
 			var self = this;
 			var todo = this.$('.elementLI').text();
-
         this.model.save({todo: todo}, {
             success: function() { console.log("successfully updated todo");},
-            error: function() { console.log("Failed to update todo");}
+            error: function() { console.log("Failed to update todo");},
+            wait : true
         });
 
 			this.$('.elementLI').removeAttr('contenteditable');
@@ -113,12 +112,16 @@ var TodoApp = new Marionette.Application();
 		},
 
 		deleteThis : function () {
-			console.log(this.model.get('_id'));
-			console.log(this.model);
 			this.model.destroy(null,{
 				success : function(){console.log('success');},
-				error: function(err){ console.log('error');}
+				error: function(err){ console.log('error');},
+				wait : true
 			});
+		},
+
+		updateCheckbox : function(){
+			this.$el.toggleClass( 'isDone' );
+			this.model.save({isFinished : this.$el.hasClass('isDone')});
 		}
 	});
 

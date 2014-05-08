@@ -4,7 +4,7 @@ var TodoApp = new Marionette.Application();
 		mainRegion : '#main-region'
 	});
 
-
+	//model
 	TodoApp.todoModel = Backbone.Model.extend({
 		idAttribute : '_id',
 		urlRoot : 'http://localhost:3030/todos',
@@ -15,12 +15,13 @@ var TodoApp = new Marionette.Application();
 		}
 	});
 
+	//collection
 	TodoApp.todoCollection = Backbone.Collection.extend({
 		model : TodoApp.todoModel,
 		url : 'http://localhost:3030/todos'
 	});
 
-
+	//template
 	TodoApp.TodoLayout = Marionette.Layout.extend({
 		template : '#todoLayout',
 		regions:{
@@ -84,6 +85,7 @@ var TodoApp = new Marionette.Application();
 		initialize: function(){
 			if(this.model.get('isFinished')){
 				this.$el.addClass( 'isDone' )
+				this.$('.elementCheckbox').prop("checked", true); //why you no work?!
 			}else{
 				this.$el.addClass( '' )
 			}

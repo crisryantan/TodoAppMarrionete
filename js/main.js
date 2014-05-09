@@ -34,18 +34,38 @@ var TodoApp = new Marionette.Application();
 		template : '#input-todo',
 		tagName : 'span',
 		'ui' : {
-			'todoInput' : '#todoInput'
+			'todoInput' : '#todoInput',
+			'selectAll' : '#check_all',
+			'deleteSelected' : '#delete_selected'
 		},
 
 		'events' : {
-			'keypress @ui.todoInput' : 'keyCode',
+			'click @ui.selectAll' : 'selectAll',
+			'click @ui.deleteSelected' : 'deleteSelected',
+			'keypress @ui.todoInput' : 'keyCode'
+		},
+
+		selectAll : function(){
+			this.collection.each(this.isFinished, this);
+		},
+
+		deleteSelected : function(){
+			var todos = this.collection.where({isFinished : true});
+			console.log(todos);
+		},
+
+
+		isFinished : function(task){
+			if($('#check_all').is(':checked')){
+				task.set('isFinished', true);
+			}else{
+				task.set('isFinished', false);
+			}
 		},
 
 		keyCode : function(e){
 			if(e.keyCode === 13 ){
 				this.addTodo();
-			}else{
-
 			}
 		},
 		addTodo : function(){
@@ -60,7 +80,7 @@ var TodoApp = new Marionette.Application();
 			},
 				error   : function(err){ console.log('error saving todo : ' + err);}
 			});
-		}
+		},
 
 	});
 
@@ -68,12 +88,11 @@ var TodoApp = new Marionette.Application();
 		template : '#todoList',
 		tagName : 'li',
 
-		ui : {
-			'todoDelete' : '.delete',
-			'finished' : '.elementCheckbox',
-			'todos' : '.elementLI'
+		'ui' : {
+			'todoDelete' : 'button.delete',
+			'finished' : 'input.elementCheckbox',
+			'todos' : 'span.elementLI'
 		},
-
 		events : {
 			'click @ui.todoDelete' : 'deleteThis',
 			'click @ui.todos' : 'taskClicked',
@@ -81,18 +100,21 @@ var TodoApp = new Marionette.Application();
 			'keypress @ui.todos': 'onEnterUpdate',
 			'click @ui.finished' : 'updateCheckbox'
 		},
-
-		initialize: function(){
-			if(this.model.get('isFinished')){
-				this.$el.addClass( 'isDone' )
-				this.$('.elementCheckbox').prop("checked", true); //why you no work?!
-			}else{
-				this.$el.addClass( '' )
-			}
+		initialize : function(){
+			this.listenTo(this.model, 'change', this.toggleAll);
 		},
 
+		'onRender' : function(){
+			if(this.model.get('isFinished')){
+				this.ui.finished.prop( 'checked' , true );
+				this.$el.addClass( 'isDone' );
+			}else{
+				this.ui.finished.prop( 'checked' , false );
+				this.$el.addClass( '' );
+			}
+		},
 		taskClicked : function(){
-			this.$('.elementLI').attr('contenteditable', true);
+			this.ui.todos.attr('contenteditable', true);
 		},
 
 		editThis : function(){
@@ -104,7 +126,7 @@ var TodoApp = new Marionette.Application();
             wait : true
         });
 
-			this.$('.elementLI').removeAttr('contenteditable');
+			this.ui.todos.removeAttr('contenteditable');
 		},
 
 		onEnterUpdate: function(ev) {
@@ -124,10 +146,31 @@ var TodoApp = new Marionette.Application();
 		updateCheckbox : function(){
 			this.$el.toggleClass( 'isDone' );
 			this.model.save({isFinished : this.$el.hasClass('isDone')});
+		},
+		toggleAll :function(){
+			var self = this;
+			if(this.model.get('isFinished')){
+				this.ui.finished.prop( 'checked' , true );
+				this.ui.todos.css('text-decoration', 'line-through');
+				this.model.save({isFinished : this.model.get('isFinished')},{
+					success : function(){console.log('success updating : ' + self.model.get('_id'));},
+					error: function(err){ console.log(err);},
+					wait : true
+				});
+			}else{
+				this.ui.finished.prop( 'checked' , false );
+				this.ui.todos.css('text-decoration', 'none');
+				this.model.save({isFinished : this.model.get('isFinished')},{
+					success : function(){console.log('success updating : ' + self.model.get('_id'));},
+					error: function(err){ console.log(err);},
+					wait : true
+				});
+			}
 		}
 	});
 
 	TodoApp.todoCollectionView = Marionette.CollectionView.extend({
+		//tagName : 'ul',
 		itemView: TodoApp.TodoList
 	});
 
@@ -142,7 +185,6 @@ var TodoApp = new Marionette.Application();
 		});
 
 		var layout = new TodoApp.TodoLayout();
-		console.log(layout);
 
 		todoCollection.fetch();
 		TodoApp.mainRegion.show(layout);

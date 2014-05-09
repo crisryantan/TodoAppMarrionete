@@ -1,3 +1,10 @@
-.isDone{
+ul {
+	list-style-type: none;
+}
+
+li.isDone > span{
 	text-decoration: line-through;
+}
+#todoInput{
+	display : block;
 }

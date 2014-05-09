@@ -28,10 +28,12 @@
 
 <script id='input-todo' type='text/template' charset='utf-8'>
 	<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
+			<input type="checkbox" id='check_all'>Select All</input>
+			<button type='submit' id='delete_selected'>Delete Selected</button>
 </script>
 
 <script id='todoList' type='text/template' charset='utf-8'>
-		<input name='todos' class='elementCheckbox' type="checkbox"><span class='elementLI'><%= todo %></span> <button href='#' class="delete">Delete</button>
+		<input name='todos' class='elementCheckbox' type='checkbox'><span class='elementLI'><%= todo %></span> <button href='#' class="delete">Delete</button>
 </script>
 <!--end my templates -->
 

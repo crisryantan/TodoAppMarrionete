@@ -45,22 +45,29 @@ var TodoApp = new Marionette.Application();
 			'keypress @ui.todoInput' : 'keyCode'
 		},
 
+
+		initialize : function(){
+			console.log(this.collection)
+		},
+
 		selectAll : function(){
-			this.collection.each(this.isFinished, this);
+			this.collection.each(function(task){
+				if($('#check_all').is(':checked')){
+					task.set('isFinished', true);
+				}else{
+					task.set('isFinished', false);
+				}
+			},this);
 		},
 
 		deleteSelected : function(){
-			var todos = this.collection.where({isFinished : true});
-			console.log(todos);
-		},
-
-
-		isFinished : function(task){
-			if($('#check_all').is(':checked')){
-				task.set('isFinished', true);
-			}else{
-				task.set('isFinished', false);
-			}
+			this.collection.each(function(model){
+				if( model.get('isFinished') === true ){
+					model.destroy( { wait : true} );
+				}else{
+					console.log('problem deleting');
+				}
+			});
 		},
 
 		keyCode : function(e){
@@ -179,7 +186,6 @@ var TodoApp = new Marionette.Application();
 
 		var todoCollection = new TodoApp.todoCollection();
 		var addTodoItem = new TodoApp.StaticView({ collection : todoCollection });
-
 		var collectionView = new TodoApp.todoCollectionView({
 			collection : todoCollection
 		});

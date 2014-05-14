@@ -7,6 +7,7 @@
 
 </head>
 <body>
+
 	<div id="main-region">
 		<p>This is our Static Page.</p>
 	</div>
@@ -22,19 +23,29 @@
 
 <!--start my templates -->
 <script id='todoLayout' type='text/template' charset='utf-8'>
-	<div id='todo-add'></div>
 	<ul id='todo-list'></ul>
 </script>
 
-<script id='input-todo' type='text/template' charset='utf-8'>
-	<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
-			<input type="checkbox" id='check_all'>Select All</input>
-			<button type='submit' id='delete_selected'>Delete Selected</button>
-</script>
 
 <script id='todoList' type='text/template' charset='utf-8'>
 		<input name='todos' class='elementCheckbox' type='checkbox'><span class='elementLI'><%= todo %></span> <button href='#' class="delete">Delete</button>
 </script>
+
+<script id="todoStatus-template" type="text/template">
+</script>
+
+
+<script id="todoComposite" type="text/template">
+	<div id="todo-add">
+			<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
+			<input type="checkbox" id='check_all'>Select All</input>
+	</div>
+	<ul class="non-list"></ul>
+	<div class="statusContainer">
+		<span>Todos Remaining : 0 <button type='submit' id='delete_selected'>Delete Selected</button>
+	</div>
+</script>
+
 <!--end my templates -->
 
 

@@ -73,13 +73,19 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 		editThis : function(){
 			var self = this;
 			var todo = this.$('.elementLI').text();
-        this.model.save({todo: todo}, {
-            success: function() { console.log("successfully updated todo");},
-            error: function() { console.log("Failed to update todo");},
-            wait : true
-        });
+			if(todo.trim()){
+				this.model.save({todo: todo}, {
+						success: function() {
+							console.log("successfully updated todo");
+						},
+						error: function() { console.log("Failed to update todo");},
+						wait : true
+				});
+				this.ui.todos.removeAttr('contenteditable');
+			}else{
+				this.deleteThis();
+			}
 
-			this.ui.todos.removeAttr('contenteditable');
 		},
 
 		onEnterUpdate: function(ev) {
@@ -146,6 +152,9 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 					if( collection.length === collection.where({isFinished : true}).length){
 						self.ui.selectAll.prop('checked', true);
 					}
+					if(collection.length === 0){
+						self.ui.selectAll.prop('checked', false);
+					}
 				}
 			});
 			this.listenTo(this.collection,'change:isFinished',this.updateFlag);
@@ -166,7 +175,6 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 		selectAll : function(){
 			var self = this;
 			if(this.ui.selectAll.is(':checked')){
-				console.log('true');
 				this.collection.each(function(task){
 					task.save( { 'isFinished' : true }, {
 						success : function(){
@@ -176,7 +184,6 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 					});
 				});
 			}else{
-				console.log('false');
 				this.collection.each(function(task){
 					task.save( { 'isFinished' : false }, {
 						success : function(){
@@ -195,6 +202,7 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 					model.destroy( { wait : true} );
 				}
 			});
+			this.$('#check_all').prop('checked', false);
 		},
 
 		keyCode : function(e){

@@ -42,9 +42,9 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 			'todos' : 'span.elementLI'
 		},
 
-		modelEvents : {
-			'change:isFinished' : 'updateDone'
-		},
+		// modelEvents : {
+		// 	'change:isFinished' : 'updateCheckbox'
+		// },
 
 		events : {
 			'click @ui.todoDelete' : 'deleteThis',
@@ -97,30 +97,22 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 		},
 
 		updateCheckbox : function(){
-			this.$el.toggleClass( 'isDone' );
-			this.model.save({isFinished : this.$el.hasClass('isDone')},{wait : true});
-		},
-
-		updateDone :function(){
 			var self = this;
-			if(this.model.get('isFinished')){
-				this.ui.finished.prop( 'checked' , true );
-				this.ui.todos.css('text-decoration', 'line-through');
-				this.model.save({isFinished : this.model.get('isFinished')},{
-					success : function(){console.log('success updating : ' + self.model.get('_id'));},
-					error: function(err){ console.log(err);},
-					wait : true
-				});
-			}else{
-				this.ui.finished.prop( 'checked' , false );
-				this.ui.todos.css('text-decoration', 'none');
-				this.model.save({isFinished : this.model.get('isFinished')},{
-					success : function(){console.log('success updating : ' + self.model.get('_id'));},
-					error: function(err){ console.log(err);},
-					wait : true
-				});
-			}
+			self.$el.toggleClass( 'isDone' );
+			this.model.save({isFinished : self.$el.hasClass('isDone')},
+				{success : function(){
+				if(self.$el.hasClass('isDone')){
+					self.ui.finished.prop( 'checked' , true );
+					self.ui.todos.css('text-decoration', 'line-through');
+				}else{
+					self.ui.finished.prop( 'checked' , false );
+					self.ui.todos.css('text-decoration', 'none');
+				}
+
+				}},
+				{wait : true});
 		}
+
 	});
 
 	TodoApp.TodoCompositeView = Marionette.CompositeView.extend({
@@ -131,9 +123,13 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 
 		'ui' : {
 			'todoInput' : '#todoInput',
+			'elementCheckbox' : '.elementCheckbox',
 			'selectAll' : '#check_all',
-			'deleteSelected' : '#delete_selected'
+			'deleteSelected' : '#delete_selected',
+			'itemsLeft' : 'span#items-left'
 		},
+
+
 
 		'events' : {
 			'click @ui.selectAll' : 'selectAll',
@@ -141,36 +137,56 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 			'keypress @ui.todoInput' : 'keyCode'
 		},
 
+
+
 		initialize : function(){
+			var self = this;
 			this.collection.fetch({
 				success : function(collection){
 					if( collection.length === collection.where({isFinished : true}).length){
-						$('#check_all').prop('checked', true);
+						self.ui.selectAll.prop('checked', true);
 					}
 				}
 			});
 			this.listenTo(this.collection,'change:isFinished',this.updateFlag);
+			this.listenTo(this.collection,'sync', this.updateRemaining);
+			this.listenTo(this.collection,'remove', this.updateRemaining);
 		},
+
 
 		updateFlag : function(){
 			if( this.collection.length === this.collection.where({isFinished : true}).length){
-				$('#check_all').prop('checked', true);
-			}else{
-				//place logic here
-				// $('#check_all').prop('checked', false);
+					this.ui.selectAll.prop('checked', true);
+			}
+			else{
+					this.ui.selectAll.prop('checked', false);
 			}
 		},
 
 		selectAll : function(){
-			this.collection.each(function(task){
-				if($('#check_all').is(':checked')){
-					task.set('isFinished', true);
-					task.save( { 'isFinished' : true } );
-				}else{
-					task.set('isFinished', false);
-					task.save( { 'isFinished' : false } );
-				}
-			});
+			var self = this;
+			if(this.ui.selectAll.is(':checked')){
+				console.log('true');
+				this.collection.each(function(task){
+					task.save( { 'isFinished' : true }, {
+						success : function(){
+							this.$('.elementCheckbox').prop('checked', true);
+							this.$('.elementLI').css('text-decoration', 'line-through');
+						}
+					});
+				});
+			}else{
+				console.log('false');
+				this.collection.each(function(task){
+					task.save( { 'isFinished' : false }, {
+						success : function(){
+							this.$('.elementCheckbox').prop('checked', false);
+							this.$('.elementLI').css('text-decoration', 'none');
+						}
+					});
+				});
+			}
+
 		},
 
 		deleteSelected : function(){
@@ -198,11 +214,26 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 			},
 				error   : function(err){ console.log('error saving todo : ' + err);}
 			});
+		},
+
+		updateRemaining : function (){
+			var remaining = this.collection.where( { 'isFinished' : false } );
+			var toDelete = Math.abs( remaining.length - this.collection.length );
+			this.ui.itemsLeft.text( remaining.length );
+			if( toDelete === 0 ){
+				this.ui.deleteSelected.addClass('hide');
+			}else{
+				this.ui.deleteSelected.removeClass('hide');
+			}
 		}
 
 	});
 
-
+	TodoApp.StatusView = Marionette.ItemView.extend({
+		tagName : 'span',
+		className : 'statusContainer',
+		template : '#todoStatus-template'
+	});
 
 
 

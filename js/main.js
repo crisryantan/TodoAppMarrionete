@@ -42,9 +42,6 @@ TodoApp.TodoList = Marionette.ItemView.extend({
 			'todos' : 'span.elementLI'
 		},
 
-		// modelEvents : {
-		// 	'change:isFinished' : 'updateCheckbox'
-		// },
 
 		events : {
 			'click @ui.todoDelete' : 'deleteThis',

@@ -13,40 +13,8 @@
 	</div>
 
 
-	<script src='js/vendor/jquery.js' type='text/javascript' charset='utf-8'></script>
-	<script src='js/vendor/bootstrap.min.js' type='text/javascript' charset='utf-8'></script>
-	<script src='js/vendor/underscore.js' type='text/javascript' charset='utf-8'></script>
-	<script src='js/vendor/backbone.js' type='text/javascript' charset='utf-8'></script>
-	<script src='js/vendor/backbone.marionette.js' type='text/javascript' charset='utf-8'></script>
-	<script src='js/main.js' type='text/javascript' charset='utf-8' async defer></script>
-
-
-<!--start my templates -->
-<script id='todoLayout' type='text/template' charset='utf-8'>
-	<ul id='todo-list'></ul>
-</script>
-
-
-<script id='todoList' type='text/template' charset='utf-8'>
-		<input name='todos' class='elementCheckbox' type='checkbox'><span class='elementLI'><%= todo %></span> <button href='#' class="delete">Delete</button>
-</script>
-
-<script id="todoStatus-template" type="text/template">
-</script>
-
-
-<script id="todoComposite" type="text/template">
-	<div id="todo-add">
-			<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
-			<input type="checkbox" id='check_all'>Select All</input>
-	</div>
-	<ul class="non-list"></ul>
-	<div class="statusContainer">
-		<span>Todos Remaining :<span id='items-left'></span> <button type='submit' id='delete_selected'>Delete Selected</button>
-	</div>
-</script>
-
-<!--end my templates -->
+	<script data-main='js/main_app.js' src='../bower_components/requirejs/require.js'></script>
+	<script src='js/require_main.js' type='text/javascript' charset='utf-8'></script>
 
 
 </script>

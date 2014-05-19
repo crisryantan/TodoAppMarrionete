@@ -1,0 +1,1 @@
+		<input name='todos' class='elementCheckbox' type='checkbox'><span class='elementLI'>{{=it.todo}}</span> <button href="#" class="delete">Delete</button>

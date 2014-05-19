@@ -1,0 +1,8 @@
+	<div id="todo-add">
+			<input id='todoInput' type='text' name='' value='' placeholder='Enter todo here'>
+			<input type="checkbox" id='check_all'>Select All</input>
+	</div>
+	<ul class="non-list"></ul>
+	<div class="statusContainer">
+		<span>Todos Remaining :<span id='items-left'></span> <button type='submit' id='delete_selected'>Delete Selected</button>
+	</div>

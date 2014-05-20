@@ -1,12 +1,12 @@
 define ( function ( require ) {
-	var Marionette = require ( 'marionette' );
+	var Marionette         = require ( 'marionette' );
 	var todoLayoutTemplate = require ( 'doT!template/todoLayoutView' );
 
-	return Marionette.Layout.extend({
+	return Marionette.Layout.extend( {
 		template : todoLayoutTemplate,
-		regions:{
+		regions  : {
 			listTodo : '#todo-list'
 		}
-	});
+	} );
 
 } );
